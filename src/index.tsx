@@ -69,6 +69,7 @@ const Toast = (props: ToastProps) => {
     interacting,
     setHeights,
     visibleToasts,
+    visibleStackedToasts,
     heights,
     index,
     toasts,
@@ -88,6 +89,7 @@ const Toast = (props: ToastProps) => {
     classNames,
     icons,
     closeButtonAriaLabel = 'Close toast',
+    scrollable,
   } = props;
   const [swipeDirection, setSwipeDirection] = React.useState<'x' | 'y' | null>(null);
   const [swipeOutDirection, setSwipeOutDirection] = React.useState<'left' | 'right' | 'up' | 'down' | null>(null);
@@ -102,7 +104,8 @@ const Toast = (props: ToastProps) => {
   const dragStartTime = React.useRef<Date | null>(null);
   const toastRef = React.useRef<HTMLLIElement>(null);
   const isFront = index === 0;
-  const isVisible = index + 1 <= visibleToasts;
+  const isVisible = index + 1 <= (expanded ? (scrollable ? Infinity : visibleToasts) : visibleStackedToasts);
+  const isLast = index + 1 === (expanded ? visibleToasts : visibleStackedToasts);
   const toastType = toast.type;
   const dismissible = toast.dismissible !== false;
   const toastClassname = toast.className || '';
@@ -259,246 +262,254 @@ const Toast = (props: ToastProps) => {
   const icon = toast.icon || icons?.[toastType] || getAsset(toastType);
 
   return (
-    <li
-      tabIndex={0}
-      ref={toastRef}
-      className={cn(
-        className,
-        toastClassname,
-        classNames?.toast,
-        toast?.classNames?.toast,
-        classNames?.default,
-        classNames?.[toastType],
-        toast?.classNames?.[toastType],
-      )}
-      data-sonner-toast=""
-      data-rich-colors={toast.richColors ?? defaultRichColors}
-      data-styled={!Boolean(toast.jsx || toast.unstyled || unstyled)}
-      data-mounted={mounted}
-      data-promise={Boolean(toast.promise)}
-      data-swiped={isSwiped}
-      data-removed={removed}
-      data-visible={isVisible}
-      data-y-position={y}
-      data-x-position={x}
-      data-index={index}
-      data-front={isFront}
-      data-swiping={swiping}
-      data-dismissible={dismissible}
-      data-type={toastType}
-      data-invert={invert}
-      data-swipe-out={swipeOut}
-      data-swipe-direction={swipeOutDirection}
-      data-expanded={Boolean(expanded || (expandByDefault && mounted))}
-      style={
-        {
-          '--index': index,
-          '--toasts-before': index,
-          '--z-index': toasts.length - index,
-          '--offset': `${removed ? offsetBeforeRemove : offset.current}px`,
-          '--initial-height': expandByDefault ? 'auto' : `${initialHeight}px`,
-          ...style,
-          ...toast.style,
-        } as React.CSSProperties
-      }
-      onDragEnd={() => {
-        setSwiping(false);
-        setSwipeDirection(null);
-        pointerStartRef.current = null;
-      }}
-      onPointerDown={(event) => {
-        if (disabled || !dismissible) return;
-        dragStartTime.current = new Date();
-        setOffsetBeforeRemove(offset.current);
-        // Ensure we maintain correct pointer capture even when going outside of the toast (e.g. when swiping)
-        (event.target as HTMLElement).setPointerCapture(event.pointerId);
-        if ((event.target as HTMLElement).tagName === 'BUTTON') return;
-        setSwiping(true);
-        pointerStartRef.current = { x: event.clientX, y: event.clientY };
-      }}
-      onPointerUp={() => {
-        if (swipeOut || !dismissible) return;
-
-        pointerStartRef.current = null;
-        const swipeAmountX = Number(
-          toastRef.current?.style.getPropertyValue('--swipe-amount-x').replace('px', '') || 0,
-        );
-        const swipeAmountY = Number(
-          toastRef.current?.style.getPropertyValue('--swipe-amount-y').replace('px', '') || 0,
-        );
-        const timeTaken = new Date().getTime() - dragStartTime.current?.getTime();
-
-        const swipeAmount = swipeDirection === 'x' ? swipeAmountX : swipeAmountY;
-        const velocity = Math.abs(swipeAmount) / timeTaken;
-
-        if (Math.abs(swipeAmount) >= SWIPE_THRESHOLD || velocity > 0.11) {
+    <>
+      <li
+        tabIndex={0}
+        ref={toastRef}
+        className={cn(
+          className,
+          toastClassname,
+          classNames?.toast,
+          toast?.classNames?.toast,
+          classNames?.default,
+          classNames?.[toastType],
+          toast?.classNames?.[toastType],
+        )}
+        data-sonner-toast=""
+        data-rich-colors={toast.richColors ?? defaultRichColors}
+        data-styled={!Boolean(toast.jsx || toast.unstyled || unstyled)}
+        data-mounted={mounted}
+        data-promise={Boolean(toast.promise)}
+        data-swiped={isSwiped}
+        data-removed={removed}
+        data-visible={isVisible}
+        data-y-position={y}
+        data-x-position={x}
+        data-index={index}
+        data-front={isFront}
+        data-swiping={swiping}
+        data-dismissible={dismissible}
+        data-type={toastType}
+        data-invert={invert}
+        data-swipe-out={swipeOut}
+        data-swipe-direction={swipeOutDirection}
+        data-expanded={Boolean(expanded || (expandByDefault && mounted))}
+        style={
+          {
+            '--index': index,
+            '--toasts-before': index,
+            '--z-index': toasts.length - index,
+            '--offset': `${removed ? offsetBeforeRemove : offset.current}px`,
+            '--initial-height': expandByDefault ? 'auto' : `${initialHeight}px`,
+            ...style,
+            ...toast.style,
+          } as React.CSSProperties
+        }
+        onDragEnd={() => {
+          setSwiping(false);
+          setSwipeDirection(null);
+          pointerStartRef.current = null;
+        }}
+        onPointerDown={(event) => {
+          if (disabled || !dismissible) return;
+          dragStartTime.current = new Date();
           setOffsetBeforeRemove(offset.current);
+          // Ensure we maintain correct pointer capture even when going outside of the toast (e.g. when swiping)
+          (event.target as HTMLElement).setPointerCapture(event.pointerId);
+          if ((event.target as HTMLElement).tagName === 'BUTTON') return;
+          setSwiping(true);
+          pointerStartRef.current = { x: event.clientX, y: event.clientY };
+        }}
+        onPointerUp={() => {
+          if (swipeOut || !dismissible) return;
 
-          toast.onDismiss?.(toast);
+          pointerStartRef.current = null;
+          const swipeAmountX = Number(
+            toastRef.current?.style.getPropertyValue('--swipe-amount-x').replace('px', '') || 0,
+          );
+          const swipeAmountY = Number(
+            toastRef.current?.style.getPropertyValue('--swipe-amount-y').replace('px', '') || 0,
+          );
+          const timeTaken = new Date().getTime() - dragStartTime.current?.getTime();
 
-          if (swipeDirection === 'x') {
-            setSwipeOutDirection(swipeAmountX > 0 ? 'right' : 'left');
+          const swipeAmount = swipeDirection === 'x' ? swipeAmountX : swipeAmountY;
+          const velocity = Math.abs(swipeAmount) / timeTaken;
+
+          if (Math.abs(swipeAmount) >= SWIPE_THRESHOLD || velocity > 0.11) {
+            setOffsetBeforeRemove(offset.current);
+
+            toast.onDismiss?.(toast);
+
+            if (swipeDirection === 'x') {
+              setSwipeOutDirection(swipeAmountX > 0 ? 'right' : 'left');
+            } else {
+              setSwipeOutDirection(swipeAmountY > 0 ? 'down' : 'up');
+            }
+
+            deleteToast();
+            setSwipeOut(true);
+
+            return;
           } else {
-            setSwipeOutDirection(swipeAmountY > 0 ? 'down' : 'up');
+            toastRef.current?.style.setProperty('--swipe-amount-x', `0px`);
+            toastRef.current?.style.setProperty('--swipe-amount-y', `0px`);
+          }
+          setIsSwiped(false);
+          setSwiping(false);
+          setSwipeDirection(null);
+        }}
+        onPointerMove={(event) => {
+          if (!pointerStartRef.current || !dismissible) return;
+
+          const isHighlighted = window.getSelection()?.toString().length > 0;
+          if (isHighlighted) return;
+
+          const yDelta = event.clientY - pointerStartRef.current.y;
+          const xDelta = event.clientX - pointerStartRef.current.x;
+
+          const swipeDirections = props.swipeDirections ?? getDefaultSwipeDirections(position);
+
+          // Determine swipe direction if not already locked
+          if (!swipeDirection && (Math.abs(xDelta) > 1 || Math.abs(yDelta) > 1)) {
+            setSwipeDirection(Math.abs(xDelta) > Math.abs(yDelta) ? 'x' : 'y');
           }
 
-          deleteToast();
-          setSwipeOut(true);
+          let swipeAmount = { x: 0, y: 0 };
 
-          return;
-        } else {
-          toastRef.current?.style.setProperty('--swipe-amount-x', `0px`);
-          toastRef.current?.style.setProperty('--swipe-amount-y', `0px`);
-        }
-        setIsSwiped(false);
-        setSwiping(false);
-        setSwipeDirection(null);
-      }}
-      onPointerMove={(event) => {
-        if (!pointerStartRef.current || !dismissible) return;
+          const getDampening = (delta: number) => {
+            const factor = Math.abs(delta) / 20;
 
-        const isHighlighted = window.getSelection()?.toString().length > 0;
-        if (isHighlighted) return;
+            return 1 / (1.5 + factor);
+          };
 
-        const yDelta = event.clientY - pointerStartRef.current.y;
-        const xDelta = event.clientX - pointerStartRef.current.x;
-
-        const swipeDirections = props.swipeDirections ?? getDefaultSwipeDirections(position);
-
-        // Determine swipe direction if not already locked
-        if (!swipeDirection && (Math.abs(xDelta) > 1 || Math.abs(yDelta) > 1)) {
-          setSwipeDirection(Math.abs(xDelta) > Math.abs(yDelta) ? 'x' : 'y');
-        }
-
-        let swipeAmount = { x: 0, y: 0 };
-
-        const getDampening = (delta: number) => {
-          const factor = Math.abs(delta) / 20;
-
-          return 1 / (1.5 + factor);
-        };
-
-        // Only apply swipe in the locked direction
-        if (swipeDirection === 'y') {
-          // Handle vertical swipes
-          if (swipeDirections.includes('top') || swipeDirections.includes('bottom')) {
-            if ((swipeDirections.includes('top') && yDelta < 0) || (swipeDirections.includes('bottom') && yDelta > 0)) {
-              swipeAmount.y = yDelta;
-            } else {
-              // Smoothly transition to dampened movement
-              const dampenedDelta = yDelta * getDampening(yDelta);
-              // Ensure we don't jump when transitioning to dampened movement
-              swipeAmount.y = Math.abs(dampenedDelta) < Math.abs(yDelta) ? dampenedDelta : yDelta;
+          // Only apply swipe in the locked direction
+          if (swipeDirection === 'y') {
+            // Handle vertical swipes
+            if (swipeDirections.includes('top') || swipeDirections.includes('bottom')) {
+              if (
+                (swipeDirections.includes('top') && yDelta < 0) ||
+                (swipeDirections.includes('bottom') && yDelta > 0)
+              ) {
+                swipeAmount.y = yDelta;
+              } else {
+                // Smoothly transition to dampened movement
+                const dampenedDelta = yDelta * getDampening(yDelta);
+                // Ensure we don't jump when transitioning to dampened movement
+                swipeAmount.y = Math.abs(dampenedDelta) < Math.abs(yDelta) ? dampenedDelta : yDelta;
+              }
+            }
+          } else if (swipeDirection === 'x') {
+            // Handle horizontal swipes
+            if (swipeDirections.includes('left') || swipeDirections.includes('right')) {
+              if (
+                (swipeDirections.includes('left') && xDelta < 0) ||
+                (swipeDirections.includes('right') && xDelta > 0)
+              ) {
+                swipeAmount.x = xDelta;
+              } else {
+                // Smoothly transition to dampened movement
+                const dampenedDelta = xDelta * getDampening(xDelta);
+                // Ensure we don't jump when transitioning to dampened movement
+                swipeAmount.x = Math.abs(dampenedDelta) < Math.abs(xDelta) ? dampenedDelta : xDelta;
+              }
             }
           }
-        } else if (swipeDirection === 'x') {
-          // Handle horizontal swipes
-          if (swipeDirections.includes('left') || swipeDirections.includes('right')) {
-            if ((swipeDirections.includes('left') && xDelta < 0) || (swipeDirections.includes('right') && xDelta > 0)) {
-              swipeAmount.x = xDelta;
-            } else {
-              // Smoothly transition to dampened movement
-              const dampenedDelta = xDelta * getDampening(xDelta);
-              // Ensure we don't jump when transitioning to dampened movement
-              swipeAmount.x = Math.abs(dampenedDelta) < Math.abs(xDelta) ? dampenedDelta : xDelta;
+
+          if (Math.abs(swipeAmount.x) > 0 || Math.abs(swipeAmount.y) > 0) {
+            setIsSwiped(true);
+          }
+
+          // Apply transform using both x and y values
+          toastRef.current?.style.setProperty('--swipe-amount-x', `${swipeAmount.x}px`);
+          toastRef.current?.style.setProperty('--swipe-amount-y', `${swipeAmount.y}px`);
+        }}
+      >
+        {closeButton && !toast.jsx && toastType !== 'loading' ? (
+          <button
+            aria-label={closeButtonAriaLabel}
+            data-disabled={disabled}
+            data-close-button
+            onClick={
+              disabled || !dismissible
+                ? () => {}
+                : () => {
+                    deleteToast();
+                    toast.onDismiss?.(toast);
+                  }
             }
-          }
-        }
-
-        if (Math.abs(swipeAmount.x) > 0 || Math.abs(swipeAmount.y) > 0) {
-          setIsSwiped(true);
-        }
-
-        // Apply transform using both x and y values
-        toastRef.current?.style.setProperty('--swipe-amount-x', `${swipeAmount.x}px`);
-        toastRef.current?.style.setProperty('--swipe-amount-y', `${swipeAmount.y}px`);
-      }}
-    >
-      {closeButton && !toast.jsx && toastType !== 'loading' ? (
-        <button
-          aria-label={closeButtonAriaLabel}
-          data-disabled={disabled}
-          data-close-button
-          onClick={
-            disabled || !dismissible
-              ? () => {}
-              : () => {
-                  deleteToast();
-                  toast.onDismiss?.(toast);
-                }
-          }
-          className={cn(classNames?.closeButton, toast?.classNames?.closeButton)}
-        >
-          {icons?.close ?? CloseIcon}
-        </button>
-      ) : null}
-      {/* TODO: This can be cleaner */}
-      {(toastType || toast.icon || toast.promise) &&
-      toast.icon !== null &&
-      (icons?.[toastType] !== null || toast.icon) ? (
-        <div data-icon="" className={cn(classNames?.icon, toast?.classNames?.icon)}>
-          {toast.promise || (toast.type === 'loading' && !toast.icon) ? toast.icon || getLoadingIcon() : null}
-          {toast.type !== 'loading' ? icon : null}
-        </div>
-      ) : null}
-
-      <div data-content="" className={cn(classNames?.content, toast?.classNames?.content)}>
-        <div data-title="" className={cn(classNames?.title, toast?.classNames?.title)}>
-          {toast.jsx ? toast.jsx : typeof toast.title === 'function' ? toast.title() : toast.title}
-        </div>
-        {toast.description ? (
-          <div
-            data-description=""
-            className={cn(
-              descriptionClassName,
-              toastDescriptionClassname,
-              classNames?.description,
-              toast?.classNames?.description,
-            )}
+            className={cn(classNames?.closeButton, toast?.classNames?.closeButton)}
           >
-            {typeof toast.description === 'function' ? toast.description() : toast.description}
+            {icons?.close ?? CloseIcon}
+          </button>
+        ) : null}
+        {/* TODO: This can be cleaner */}
+        {(toastType || toast.icon || toast.promise) &&
+        toast.icon !== null &&
+        (icons?.[toastType] !== null || toast.icon) ? (
+          <div data-icon="" className={cn(classNames?.icon, toast?.classNames?.icon)}>
+            {toast.promise || (toast.type === 'loading' && !toast.icon) ? toast.icon || getLoadingIcon() : null}
+            {toast.type !== 'loading' ? icon : null}
           </div>
         ) : null}
-      </div>
-      {React.isValidElement(toast.cancel) ? (
-        toast.cancel
-      ) : toast.cancel && isAction(toast.cancel) ? (
-        <button
-          data-button
-          data-cancel
-          style={toast.cancelButtonStyle || cancelButtonStyle}
-          onClick={(event) => {
-            // We need to check twice because typescript
-            if (!isAction(toast.cancel)) return;
-            if (!dismissible) return;
-            toast.cancel.onClick?.(event);
-            deleteToast();
-          }}
-          className={cn(classNames?.cancelButton, toast?.classNames?.cancelButton)}
-        >
-          {toast.cancel.label}
-        </button>
-      ) : null}
-      {React.isValidElement(toast.action) ? (
-        toast.action
-      ) : toast.action && isAction(toast.action) ? (
-        <button
-          data-button
-          data-action
-          style={toast.actionButtonStyle || actionButtonStyle}
-          onClick={(event) => {
-            // We need to check twice because typescript
-            if (!isAction(toast.action)) return;
-            toast.action.onClick?.(event);
-            if (event.defaultPrevented) return;
-            deleteToast();
-          }}
-          className={cn(classNames?.actionButton, toast?.classNames?.actionButton)}
-        >
-          {toast.action.label}
-        </button>
-      ) : null}
-    </li>
+
+        <div data-content="" className={cn(classNames?.content, toast?.classNames?.content)}>
+          <div data-title="" className={cn(classNames?.title, toast?.classNames?.title)}>
+            {toast.jsx ? toast.jsx : typeof toast.title === 'function' ? toast.title() : toast.title}
+          </div>
+          {toast.description ? (
+            <div
+              data-description=""
+              className={cn(
+                descriptionClassName,
+                toastDescriptionClassname,
+                classNames?.description,
+                toast?.classNames?.description,
+              )}
+            >
+              {typeof toast.description === 'function' ? toast.description() : toast.description}
+            </div>
+          ) : null}
+        </div>
+        {React.isValidElement(toast.cancel) ? (
+          toast.cancel
+        ) : toast.cancel && isAction(toast.cancel) ? (
+          <button
+            data-button
+            data-cancel
+            style={toast.cancelButtonStyle || cancelButtonStyle}
+            onClick={(event) => {
+              // We need to check twice because typescript
+              if (!isAction(toast.cancel)) return;
+              if (!dismissible) return;
+              toast.cancel.onClick?.(event);
+              deleteToast();
+            }}
+            className={cn(classNames?.cancelButton, toast?.classNames?.cancelButton)}
+          >
+            {toast.cancel.label}
+          </button>
+        ) : null}
+        {React.isValidElement(toast.action) ? (
+          toast.action
+        ) : toast.action && isAction(toast.action) ? (
+          <button
+            data-button
+            data-action
+            style={toast.actionButtonStyle || actionButtonStyle}
+            onClick={(event) => {
+              // We need to check twice because typescript
+              if (!isAction(toast.action)) return;
+              toast.action.onClick?.(event);
+              if (event.defaultPrevented) return;
+              deleteToast();
+            }}
+            className={cn(classNames?.actionButton, toast?.classNames?.actionButton)}
+          >
+            {toast.action.label}
+          </button>
+        ) : null}
+      </li>
+    </>
   );
 };
 
@@ -603,11 +614,14 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
     duration,
     style,
     visibleToasts = VISIBLE_TOASTS_AMOUNT,
+    visibleStackedToasts = VISIBLE_TOASTS_AMOUNT,
     toastOptions,
     dir = getDocumentDirection(),
     gap = GAP,
     icons,
     containerAriaLabel = 'Notifications',
+    clearAllButton,
+    scrollable,
   } = props;
   const [toasts, setToasts] = React.useState<ToastT[]>([]);
   const possiblePositions = React.useMemo(() => {
@@ -640,6 +654,17 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
       }
 
       return toasts.filter(({ id }) => id !== toastToRemove.id);
+    });
+  }, []);
+
+  const removeAllToasts = React.useCallback(() => {
+    setToasts((toasts) => {
+      toasts.forEach((toast) => {
+        if (!toast.delete) {
+          ToastState.dismiss(toast.id);
+        }
+      });
+      return [];
     });
   }, []);
 
@@ -777,7 +802,7 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
         if (!toasts.length) return null;
 
         return (
-          <ol
+          <div
             key={position}
             dir={dir === 'auto' ? getDocumentDirection() : dir}
             tabIndex={-1}
@@ -834,45 +859,89 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
             }}
             onPointerUp={() => setInteracting(false)}
           >
-            {toasts
-              .filter((toast) => (!toast.position && index === 0) || toast.position === position)
-              .map((toast, index) => (
-                <Toast
-                  key={toast.id}
-                  icons={icons}
-                  index={index}
-                  toast={toast}
-                  defaultRichColors={richColors}
-                  duration={toastOptions?.duration ?? duration}
-                  className={toastOptions?.className}
-                  descriptionClassName={toastOptions?.descriptionClassName}
-                  invert={invert}
-                  visibleToasts={visibleToasts}
-                  closeButton={toastOptions?.closeButton ?? closeButton}
-                  interacting={interacting}
-                  position={position}
-                  style={toastOptions?.style}
-                  unstyled={toastOptions?.unstyled}
-                  classNames={toastOptions?.classNames}
-                  cancelButtonStyle={toastOptions?.cancelButtonStyle}
-                  actionButtonStyle={toastOptions?.actionButtonStyle}
-                  closeButtonAriaLabel={toastOptions?.closeButtonAriaLabel}
-                  removeToast={removeToast}
-                  toasts={toasts.filter((t) => t.position == toast.position)}
-                  heights={heights.filter((h) => h.position == toast.position)}
-                  setHeights={setHeights}
-                  expandByDefault={expand}
-                  gap={gap}
-                  expanded={expanded}
-                  swipeDirections={props.swipeDirections}
-                />
-              ))}
-          </ol>
+            {clearAllButton && toasts.length > 1 && expanded && (
+              <button
+                onClick={removeAllToasts}
+                aria-label="Clear all notifications"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  transform: 'translateY(-100%)',
+                  zIndex: 10,
+                }}
+              >
+                {typeof clearAllButton === 'boolean' ? 'Clear All' : clearAllButton}
+              </button>
+            )}
+            <div
+              style={{
+                ...(scrollable
+                  ? {
+                      overflowY: 'scroll',
+                      overflowX: 'hidden',
+                      position: 'relative',
+                      maxHeight: heights.slice(0, visibleToasts).reduce((acc, curr) => acc + curr.height, 0),
+                      scrollbarWidth: 'none',
+                      display: 'flex',
+                      alignItems: 'flex-end',
+                      flexDirection: 'column-reverse',
+                    }
+                  : {}),
+              }}
+            >
+              <ol
+                style={{
+                  ...(scrollable
+                    ? {
+                        height: heights.reduce((acc, curr) => acc + curr.height + gap, 0),
+                      }
+                    : {}),
+                }}
+              >
+                {toasts
+                  .filter((toast) => (!toast.position && index === 0) || toast.position === position)
+                  .map((toast, index) => (
+                    <Toast
+                      key={toast.id}
+                      icons={icons}
+                      index={index}
+                      toast={toast}
+                      defaultRichColors={richColors}
+                      duration={toastOptions?.duration ?? duration}
+                      className={toastOptions?.className}
+                      descriptionClassName={toastOptions?.descriptionClassName}
+                      invert={invert}
+                      visibleToasts={visibleToasts}
+                      visibleStackedToasts={visibleStackedToasts}
+                      closeButton={toastOptions?.closeButton ?? closeButton}
+                      interacting={interacting}
+                      position={position}
+                      style={toastOptions?.style}
+                      unstyled={toastOptions?.unstyled}
+                      classNames={toastOptions?.classNames}
+                      cancelButtonStyle={toastOptions?.cancelButtonStyle}
+                      actionButtonStyle={toastOptions?.actionButtonStyle}
+                      closeButtonAriaLabel={toastOptions?.closeButtonAriaLabel}
+                      removeToast={removeToast}
+                      toasts={toasts.filter((t) => t.position == toast.position)}
+                      heights={heights.filter((h) => h.position == toast.position)}
+                      setHeights={setHeights}
+                      expandByDefault={expand}
+                      gap={gap}
+                      expanded={expanded}
+                      swipeDirections={props.swipeDirections}
+                      scrollable={scrollable}
+                    />
+                  ))}
+              </ol>
+            </div>
+          </div>
         );
       })}
     </section>
   );
 });
 
-export { toast, Toaster, type ExternalToast, type ToastT, type ToasterProps, useSonner };
-export { type ToastClassnames, type ToastToDismiss, type Action } from './types';
+export { type Action, type ToastClassnames, type ToastToDismiss } from './types';
+export { toast, Toaster, useSonner, type ExternalToast, type ToasterProps, type ToastT };

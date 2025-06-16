@@ -132,6 +132,7 @@ export interface ToasterProps {
   duration?: number;
   gap?: number;
   visibleToasts?: number;
+  visibleStackedToasts?: number;
   closeButton?: boolean;
   toastOptions?: ToastOptions;
   className?: string;
@@ -142,6 +143,8 @@ export interface ToasterProps {
   swipeDirections?: SwipeDirection[];
   icons?: ToastIcons;
   containerAriaLabel?: string;
+  clearAllButton?: boolean | React.ReactNode;
+  scrollable?: boolean;
 }
 
 export type SwipeDirection = 'top' | 'right' | 'bottom' | 'left';
@@ -159,6 +162,7 @@ export interface ToastProps {
   gap?: number;
   position: Position;
   visibleToasts: number;
+  visibleStackedToasts: number;
   expandByDefault: boolean;
   closeButton: boolean;
   interacting: boolean;
@@ -174,6 +178,7 @@ export interface ToastProps {
   icons?: ToastIcons;
   closeButtonAriaLabel?: string;
   defaultRichColors?: boolean;
+  scrollable?: boolean;
 }
 
 export enum SwipeStateTypes {
