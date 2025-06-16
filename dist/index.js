@@ -446,7 +446,7 @@ function getDefaultSwipeDirections(position) {
 }
 const Toast = (props)=>{
     var _toast_classNames, _toast_classNames1, _toast_classNames2, _toast_classNames3, _toast_classNames4, _toast_classNames5, _toast_classNames6, _toast_classNames7, _toast_classNames8;
-    const { invert: ToasterInvert, toast, unstyled, interacting, setHeights, visibleToasts, visibleStackedToasts, heights, index, toasts, expanded, removeToast, defaultRichColors, closeButton: closeButtonFromToaster, style, cancelButtonStyle, actionButtonStyle, className = '', descriptionClassName = '', duration: durationFromToaster, position, gap, expandByDefault, classNames, icons, closeButtonAriaLabel = 'Close toast', scrollable } = props;
+    const { invert: ToasterInvert, toast, unstyled, interacting, setHeights, visibleToasts, visibleStackedToasts, heights, index, toasts, expanded, removeToast, defaultRichColors, closeButton: closeButtonFromToaster, style, cancelButtonStyle, actionButtonStyle, className = '', descriptionClassName = '', duration: durationFromToaster, position, gap, expandByDefault, classNames, icons, closeButtonAriaLabel = 'Close toast', scrollable, clearAllButton, removeAllToasts } = props;
     const [swipeDirection, setSwipeDirection] = React__default.default.useState(null);
     const [swipeOutDirection, setSwipeOutDirection] = React__default.default.useState(null);
     const [mounted, setMounted] = React__default.default.useState(false);
@@ -461,6 +461,7 @@ const Toast = (props)=>{
     const toastRef = React__default.default.useRef(null);
     const isFront = index === 0;
     const isVisible = index + 1 <= (expanded ? scrollable ? Infinity : visibleToasts : visibleStackedToasts);
+    const isLast = index + 1 === (expanded ? visibleToasts : visibleStackedToasts);
     const toastType = toast.type;
     const dismissible = toast.dismissible !== false;
     const toastClassname = toast.className || '';
@@ -781,7 +782,17 @@ const Toast = (props)=>{
             (_toastRef_current = toastRef.current) == null ? void 0 : _toastRef_current.style.setProperty('--swipe-amount-x', `${swipeAmount.x}px`);
             (_toastRef_current1 = toastRef.current) == null ? void 0 : _toastRef_current1.style.setProperty('--swipe-amount-y', `${swipeAmount.y}px`);
         }
-    }, closeButton && !toast.jsx && toastType !== 'loading' ? /*#__PURE__*/ React__default.default.createElement("button", {
+    }, clearAllButton && toasts.length > 1 && toasts.length <= visibleToasts && expanded && isLast && /*#__PURE__*/ React__default.default.createElement("button", {
+        onClick: removeAllToasts,
+        "aria-label": "Clear all notifications",
+        style: {
+            position: 'absolute',
+            top: -30,
+            right: 0,
+            zIndex: 10
+        },
+        "data-sonner-clear-all": ""
+    }, typeof clearAllButton === 'boolean' ? 'Clear All' : clearAllButton), closeButton && !toast.jsx && toastType !== 'loading' ? /*#__PURE__*/ React__default.default.createElement("button", {
         "aria-label": closeButtonAriaLabel,
         "data-disabled": disabled,
         "data-close-button": true,
@@ -1147,7 +1158,7 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
                 setInteracting(true);
             },
             onPointerUp: ()=>setInteracting(false)
-        }, clearAllButton && toasts.length > 1 && expanded && /*#__PURE__*/ React__default.default.createElement("button", {
+        }, clearAllButton && toasts.length > 1 && toasts.length > visibleToasts && expanded && /*#__PURE__*/ React__default.default.createElement("button", {
             onClick: removeAllToasts,
             "aria-label": "Clear all notifications",
             style: {
@@ -1172,7 +1183,7 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
         }, /*#__PURE__*/ React__default.default.createElement("ol", {
             style: {
                 ...showScroll || clearAllButton ? {
-                    height: heights.reduce((acc, curr)=>acc + curr.height + gap, 0)
+                    height: expanded ? heights.reduce((acc, curr)=>acc + curr.height + gap, 0) : heights.length > 0 ? heights[0].height + visibleStackedToasts * gap : 0
                 } : {}
             }
         }, toasts.filter((toast)=>!toast.position && index === 0 || toast.position === position).map((toast, index)=>{
@@ -1206,7 +1217,9 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
                 gap: gap,
                 expanded: expanded,
                 swipeDirections: props.swipeDirections,
-                scrollable: showScroll
+                scrollable: showScroll,
+                clearAllButton: clearAllButton,
+                removeAllToasts: removeAllToasts
             });
         }))));
     })));

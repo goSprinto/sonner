@@ -90,6 +90,8 @@ const Toast = (props: ToastProps) => {
     icons,
     closeButtonAriaLabel = 'Close toast',
     scrollable,
+    clearAllButton,
+    removeAllToasts,
   } = props;
   const [swipeDirection, setSwipeDirection] = React.useState<'x' | 'y' | null>(null);
   const [swipeOutDirection, setSwipeOutDirection] = React.useState<'left' | 'right' | 'up' | 'down' | null>(null);
@@ -424,6 +426,21 @@ const Toast = (props: ToastProps) => {
           toastRef.current?.style.setProperty('--swipe-amount-y', `${swipeAmount.y}px`);
         }}
       >
+        {clearAllButton && toasts.length > 1 && toasts.length <= visibleToasts && expanded && isLast && (
+          <button
+            onClick={removeAllToasts}
+            aria-label="Clear all notifications"
+            style={{
+              position: 'absolute',
+              top: -30,
+              right: 0,
+              zIndex: 10,
+            }}
+            data-sonner-clear-all=""
+          >
+            {typeof clearAllButton === 'boolean' ? 'Clear All' : clearAllButton}
+          </button>
+        )}
         {closeButton && !toast.jsx && toastType !== 'loading' ? (
           <button
             aria-label={closeButtonAriaLabel}
@@ -862,7 +879,7 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
             }}
             onPointerUp={() => setInteracting(false)}
           >
-            {clearAllButton && toasts.length > 1 && expanded && (
+            {clearAllButton && toasts.length > 1 && toasts.length > visibleToasts && expanded && (
               <button
                 onClick={removeAllToasts}
                 aria-label="Clear all notifications"
@@ -899,7 +916,11 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
                 style={{
                   ...(showScroll || clearAllButton
                     ? {
-                        height: heights.reduce((acc, curr) => acc + curr.height + gap, 0),
+                        height: expanded
+                          ? heights.reduce((acc, curr) => acc + curr.height + gap, 0)
+                          : heights.length > 0
+                          ? heights[0].height + visibleStackedToasts * gap
+                          : 0,
                       }
                     : {}),
                 }}
@@ -937,6 +958,8 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
                       expanded={expanded}
                       swipeDirections={props.swipeDirections}
                       scrollable={showScroll}
+                      clearAllButton={clearAllButton}
+                      removeAllToasts={removeAllToasts}
                     />
                   ))}
               </ol>
