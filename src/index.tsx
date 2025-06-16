@@ -786,6 +786,8 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
     }
   }, [listRef.current]);
 
+  const showScroll = toasts.length > visibleToasts && scrollable;
+
   return (
     // Remove item from normal navigation flow, only available via hotkey
     <section
@@ -877,12 +879,15 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
             )}
             <div
               style={{
-                ...(scrollable
+                ...(showScroll
                   ? {
                       overflowY: 'scroll',
                       overflowX: 'hidden',
                       position: 'relative',
-                      maxHeight: heights.slice(0, visibleToasts).reduce((acc, curr) => acc + curr.height, 0),
+                      maxHeight:
+                        toasts.length > visibleToasts &&
+                        heights.slice(0, visibleToasts).reduce((acc, curr) => acc + curr.height + gap, 0) -
+                          (heights.length >= visibleToasts ? heights[visibleToasts - 1].height / 2 : 0),
                       scrollbarWidth: 'none',
                       display: 'flex',
                       flexDirection: 'column-reverse',
@@ -892,7 +897,7 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
             >
               <ol
                 style={{
-                  ...(scrollable
+                  ...(showScroll || clearAllButton
                     ? {
                         height: heights.reduce((acc, curr) => acc + curr.height + gap, 0),
                       }
@@ -931,7 +936,7 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
                       gap={gap}
                       expanded={expanded}
                       swipeDirections={props.swipeDirections}
-                      scrollable={scrollable}
+                      scrollable={showScroll}
                     />
                   ))}
               </ol>

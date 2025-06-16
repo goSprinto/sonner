@@ -1082,6 +1082,7 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
     }, [
         listRef.current
     ]);
+    const showScroll = toasts.length > visibleToasts && scrollable;
     return(// Remove item from normal navigation flow, only available via hotkey
     /*#__PURE__*/ React__default.default.createElement("section", {
         ref: ref,
@@ -1158,11 +1159,11 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
             }
         }, typeof clearAllButton === 'boolean' ? 'Clear All' : clearAllButton), /*#__PURE__*/ React__default.default.createElement("div", {
             style: {
-                ...scrollable ? {
+                ...showScroll ? {
                     overflowY: 'scroll',
                     overflowX: 'hidden',
                     position: 'relative',
-                    maxHeight: heights.slice(0, visibleToasts).reduce((acc, curr)=>acc + curr.height, 0),
+                    maxHeight: toasts.length > visibleToasts && heights.slice(0, visibleToasts).reduce((acc, curr)=>acc + curr.height + gap, 0) - (heights.length >= visibleToasts ? heights[visibleToasts - 1].height / 2 : 0),
                     scrollbarWidth: 'none',
                     display: 'flex',
                     flexDirection: 'column-reverse'
@@ -1170,7 +1171,7 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
             }
         }, /*#__PURE__*/ React__default.default.createElement("ol", {
             style: {
-                ...scrollable ? {
+                ...showScroll || clearAllButton ? {
                     height: heights.reduce((acc, curr)=>acc + curr.height + gap, 0)
                 } : {}
             }
@@ -1205,7 +1206,7 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
                 gap: gap,
                 expanded: expanded,
                 swipeDirections: props.swipeDirections,
-                scrollable: scrollable
+                scrollable: showScroll
             });
         }))));
     })));
