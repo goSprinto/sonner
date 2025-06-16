@@ -922,7 +922,7 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
     const { invert, position = 'bottom-right', hotkey = [
         'altKey',
         'KeyT'
-    ], expand, closeButton, className, offset, mobileOffset, theme = 'light', richColors, duration, style, visibleToasts = VISIBLE_TOASTS_AMOUNT, visibleStackedToasts = VISIBLE_TOASTS_AMOUNT, toastOptions, dir = getDocumentDirection(), gap = GAP, icons, containerAriaLabel = 'Notifications', clearAllButton, scrollable } = props;
+    ], expand, closeButton, className, offset, mobileOffset, theme = 'light', richColors, duration, style, visibleToasts = VISIBLE_TOASTS_AMOUNT, visibleStackedToasts = VISIBLE_TOASTS_AMOUNT, toastOptions, dir = getDocumentDirection(), gap = GAP, icons, containerAriaLabel = 'Notifications', clearAllButton, scrollable, toastWidth = TOAST_WIDTH } = props;
     const [toasts, setToasts] = React__default.default.useState([]);
     const possiblePositions = React__default.default.useMemo(()=>{
         return Array.from(new Set([
@@ -1107,7 +1107,7 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
             "data-x-position": x,
             style: {
                 '--front-toast-height': `${((_heights_ = heights[0]) == null ? void 0 : _heights_.height) || 0}px`,
-                '--width': `${TOAST_WIDTH}px`,
+                '--width': `${toastWidth}px`,
                 '--gap': `${gap}px`,
                 ...style,
                 ...assignOffset(offset, mobileOffset)

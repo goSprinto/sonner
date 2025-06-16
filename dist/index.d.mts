@@ -114,6 +114,7 @@ interface ToasterProps {
     containerAriaLabel?: string;
     clearAllButton?: boolean | React.ReactNode;
     scrollable?: boolean;
+    toastWidth?: number;
 }
 type SwipeDirection = 'top' | 'right' | 'bottom' | 'left';
 interface ToastToDismiss {

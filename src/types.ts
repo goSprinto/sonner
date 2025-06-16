@@ -145,6 +145,7 @@ export interface ToasterProps {
   containerAriaLabel?: string;
   clearAllButton?: boolean | React.ReactNode;
   scrollable?: boolean;
+  toastWidth?: number;
 }
 
 export type SwipeDirection = 'top' | 'right' | 'bottom' | 'left';
