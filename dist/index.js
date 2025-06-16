@@ -1165,7 +1165,6 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
                     maxHeight: heights.slice(0, visibleToasts).reduce((acc, curr)=>acc + curr.height, 0),
                     scrollbarWidth: 'none',
                     display: 'flex',
-                    alignItems: 'flex-end',
                     flexDirection: 'column-reverse'
                 } : {}
             }
