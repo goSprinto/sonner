@@ -374,6 +374,10 @@ html[dir='rtl'],
   animation-name: swipe-out-down;
 }
 
+[data-sonner-clear-all] {
+  animation: sonner-fade-in 300ms ease forwards;
+}
+
 @keyframes swipe-out-left {
   from {
     transform: var(--y) translateX(var(--swipe-amount-x));

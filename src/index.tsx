@@ -870,9 +870,9 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
                   position: 'absolute',
                   top: 0,
                   right: 0,
-                  transform: 'translateY(-100%)',
                   zIndex: 10,
                 }}
+                data-sonner-clear-all=""
               >
                 {typeof clearAllButton === 'boolean' ? 'Clear All' : clearAllButton}
               </button>
