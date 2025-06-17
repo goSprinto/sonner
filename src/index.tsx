@@ -426,21 +426,6 @@ const Toast = (props: ToastProps) => {
           toastRef.current?.style.setProperty('--swipe-amount-y', `${swipeAmount.y}px`);
         }}
       >
-        {clearAllButton && toasts.length > 1 && toasts.length <= visibleToasts && expanded && isLast && (
-          <button
-            onClick={removeAllToasts}
-            aria-label="Clear all notifications"
-            style={{
-              position: 'absolute',
-              top: -30,
-              right: 0,
-              zIndex: 10,
-            }}
-            data-sonner-clear-all=""
-          >
-            {typeof clearAllButton === 'boolean' ? 'Clear All' : clearAllButton}
-          </button>
-        )}
         {closeButton && !toast.jsx && toastType !== 'loading' ? (
           <button
             aria-label={closeButtonAriaLabel}
@@ -630,15 +615,15 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
     richColors,
     duration,
     style,
-    visibleToasts = VISIBLE_TOASTS_AMOUNT,
-    visibleStackedToasts = VISIBLE_TOASTS_AMOUNT,
+    visibleToasts = 7,
+    visibleStackedToasts = 3,
     toastOptions,
     dir = getDocumentDirection(),
     gap = GAP,
     icons,
     containerAriaLabel = 'Notifications',
-    clearAllButton,
-    scrollable,
+    clearAllButton = true,
+    scrollable = true,
     toastWidth = TOAST_WIDTH,
   } = props;
   const [toasts, setToasts] = React.useState<ToastT[]>([]);
@@ -879,15 +864,15 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
             }}
             onPointerUp={() => setInteracting(false)}
           >
-            {clearAllButton && toasts.length > 1 && toasts.length > visibleToasts && expanded && (
+            {clearAllButton && toasts.length > 1 && expanded && (
               <button
                 onClick={removeAllToasts}
                 aria-label="Clear all notifications"
                 style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  zIndex: 10,
+                  transform: `translateY(-${
+                    heights.slice(0, visibleToasts).reduce((acc, curr) => acc + curr.height + gap, 0) -
+                    (scrollable && heights.length > visibleToasts ? heights[visibleToasts - 1].height / 2 : 0)
+                  }px)`,
                 }}
                 data-sonner-clear-all=""
               >
@@ -940,7 +925,7 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
                       invert={invert}
                       visibleToasts={visibleToasts}
                       visibleStackedToasts={visibleStackedToasts}
-                      closeButton={toastOptions?.closeButton ?? closeButton}
+                      closeButton={true}
                       interacting={interacting}
                       position={position}
                       style={toastOptions?.style}

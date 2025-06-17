@@ -375,7 +375,12 @@ html[dir='rtl'],
 }
 
 [data-sonner-clear-all] {
-  animation: sonner-fade-in 300ms ease forwards;
+  transition: transform 400ms, opacity 400ms;
+  animation: sonner-fade-in-clear-all 500ms ease forwards;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 10;
 }
 
 @keyframes swipe-out-left {
@@ -671,6 +676,15 @@ html[dir='rtl'],
 .sonner-loading-bar:nth-child(12) {
   animation-delay: -0.1s;
   transform: rotate(330deg) translate(146%);
+}
+
+@keyframes sonner-fade-in-clear-all {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 @keyframes sonner-fade-in {
