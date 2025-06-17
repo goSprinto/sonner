@@ -407,6 +407,8 @@ function isAction(action) {
     return action.label !== undefined;
 }
 
+// Visible toasts amount
+const VISIBLE_TOASTS_AMOUNT = 3;
 // Viewport padding
 const VIEWPORT_OFFSET = '24px';
 // Mobile viewport padding
@@ -913,7 +915,7 @@ const Toaster = /*#__PURE__*/ React.forwardRef(function Toaster(props, ref) {
     const { invert, position = 'bottom-right', hotkey = [
         'altKey',
         'KeyT'
-    ], expand, closeButton, className, offset, mobileOffset, theme = 'light', richColors, duration, style, visibleToasts = 7, visibleStackedToasts = 3, toastOptions, dir = getDocumentDirection(), gap = GAP, icons, containerAriaLabel = 'Notifications', clearAllButton = true, scrollable = true, toastWidth = TOAST_WIDTH } = props;
+    ], expand, closeButton, className, offset, mobileOffset, theme = 'light', richColors, duration, style, visibleToasts = VISIBLE_TOASTS_AMOUNT, visibleStackedToasts = VISIBLE_TOASTS_AMOUNT, toastOptions, dir = getDocumentDirection(), gap = GAP, icons, containerAriaLabel = 'Notifications', clearAllButton, scrollable, toastWidth = TOAST_WIDTH } = props;
     const [toasts, setToasts] = React.useState([]);
     const possiblePositions = React.useMemo(()=>{
         return Array.from(new Set([
@@ -1164,7 +1166,7 @@ const Toaster = /*#__PURE__*/ React.forwardRef(function Toaster(props, ref) {
                 } : {}
             }
         }, toasts.filter((toast)=>!toast.position && index === 0 || toast.position === position).map((toast, index)=>{
-            var _toastOptions_duration;
+            var _toastOptions_duration, _toastOptions_closeButton;
             return /*#__PURE__*/ React.createElement(Toast, {
                 key: toast.id,
                 icons: icons,
@@ -1177,7 +1179,7 @@ const Toaster = /*#__PURE__*/ React.forwardRef(function Toaster(props, ref) {
                 invert: invert,
                 visibleToasts: visibleToasts,
                 visibleStackedToasts: visibleStackedToasts,
-                closeButton: true,
+                closeButton: (_toastOptions_closeButton = toastOptions == null ? void 0 : toastOptions.closeButton) != null ? _toastOptions_closeButton : closeButton,
                 interacting: interacting,
                 position: position,
                 style: toastOptions == null ? void 0 : toastOptions.style,
