@@ -180,8 +180,6 @@ export interface ToastProps {
   closeButtonAriaLabel?: string;
   defaultRichColors?: boolean;
   scrollable?: boolean;
-  clearAllButton?: boolean | React.ReactNode;
-  removeAllToasts?: () => void;
 }
 
 export enum SwipeStateTypes {

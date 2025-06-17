@@ -90,8 +90,6 @@ const Toast = (props: ToastProps) => {
     icons,
     closeButtonAriaLabel = 'Close toast',
     scrollable,
-    clearAllButton,
-    removeAllToasts,
   } = props;
   const [swipeDirection, setSwipeDirection] = React.useState<'x' | 'y' | null>(null);
   const [swipeOutDirection, setSwipeOutDirection] = React.useState<'left' | 'right' | 'up' | 'down' | null>(null);
@@ -943,8 +941,6 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
                       expanded={expanded}
                       swipeDirections={props.swipeDirections}
                       scrollable={showScroll}
-                      clearAllButton={clearAllButton}
-                      removeAllToasts={removeAllToasts}
                     />
                   ))}
               </ol>

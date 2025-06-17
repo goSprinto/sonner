@@ -446,7 +446,7 @@ function getDefaultSwipeDirections(position) {
 }
 const Toast = (props)=>{
     var _toast_classNames, _toast_classNames1, _toast_classNames2, _toast_classNames3, _toast_classNames4, _toast_classNames5, _toast_classNames6, _toast_classNames7, _toast_classNames8;
-    const { invert: ToasterInvert, toast, unstyled, interacting, setHeights, visibleToasts, visibleStackedToasts, heights, index, toasts, expanded, removeToast, defaultRichColors, closeButton: closeButtonFromToaster, style, cancelButtonStyle, actionButtonStyle, className = '', descriptionClassName = '', duration: durationFromToaster, position, gap, expandByDefault, classNames, icons, closeButtonAriaLabel = 'Close toast', scrollable, clearAllButton, removeAllToasts } = props;
+    const { invert: ToasterInvert, toast, unstyled, interacting, setHeights, visibleToasts, visibleStackedToasts, heights, index, toasts, expanded, removeToast, defaultRichColors, closeButton: closeButtonFromToaster, style, cancelButtonStyle, actionButtonStyle, className = '', descriptionClassName = '', duration: durationFromToaster, position, gap, expandByDefault, classNames, icons, closeButtonAriaLabel = 'Close toast', scrollable } = props;
     const [swipeDirection, setSwipeDirection] = React__default.default.useState(null);
     const [swipeOutDirection, setSwipeOutDirection] = React__default.default.useState(null);
     const [mounted, setMounted] = React__default.default.useState(false);
@@ -1203,9 +1203,7 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
                 gap: gap,
                 expanded: expanded,
                 swipeDirections: props.swipeDirections,
-                scrollable: showScroll,
-                clearAllButton: clearAllButton,
-                removeAllToasts: removeAllToasts
+                scrollable: showScroll
             });
         }))));
     })));
