@@ -928,7 +928,7 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
     const { invert, position = 'bottom-right', hotkey = [
         'altKey',
         'KeyT'
-    ], expand, closeButton, className, offset, mobileOffset, theme = 'light', richColors, duration, style, visibleToasts = VISIBLE_TOASTS_AMOUNT, visibleStackedToasts = VISIBLE_TOASTS_AMOUNT, toastOptions, dir = getDocumentDirection(), gap = GAP, icons, containerAriaLabel = 'Notifications', clearAllButton, scrollable, toastWidth = TOAST_WIDTH, showBackdrop } = props;
+    ], expand, closeButton, className, offset, mobileOffset, theme = 'light', richColors, duration, style, visibleToasts = VISIBLE_TOASTS_AMOUNT, visibleStackedToasts = VISIBLE_TOASTS_AMOUNT, toastOptions, dir = getDocumentDirection(), gap = GAP, icons, containerAriaLabel = 'Notifications', clearAllButton, onClickClearAll, scrollable, toastWidth = TOAST_WIDTH, showBackdrop, onScrollVisible } = props;
     const [toasts, setToasts] = React__default.default.useState([]);
     const possiblePositions = React__default.default.useMemo(()=>{
         return Array.from(new Set([
@@ -956,6 +956,7 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
         });
     }, []);
     const removeAllToasts = React__default.default.useCallback(()=>{
+        onClickClearAll == null ? void 0 : onClickClearAll();
         setToasts((toasts)=>{
             toasts.forEach((toast)=>{
                 if (!toast.delete) {
@@ -1088,7 +1089,24 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
     }, [
         listRef.current
     ]);
-    const showScroll = toasts.length > visibleToasts && scrollable;
+    const showScroll = React__default.default.useMemo(()=>{
+        const isScrollable = toasts.length > visibleToasts && scrollable;
+        return isScrollable;
+    }, [
+        toasts,
+        visibleToasts,
+        scrollable
+    ]);
+    React__default.default.useEffect(()=>{
+        if (showScroll) {
+            onScrollVisible == null ? void 0 : onScrollVisible({
+                nbToasts: heights.length,
+                totalHeight: heights.reduce((acc, curr)=>acc + curr.height + gap, 0)
+            });
+        }
+    }, [
+        showScroll
+    ]);
     return(// Remove item from normal navigation flow, only available via hotkey
     /*#__PURE__*/ React__default.default.createElement("section", {
         ref: ref,

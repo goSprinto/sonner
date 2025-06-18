@@ -628,9 +628,11 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
     icons,
     containerAriaLabel = 'Notifications',
     clearAllButton,
+    onClickClearAll,
     scrollable,
     toastWidth = TOAST_WIDTH,
     showBackdrop,
+    onScrollVisible,
   } = props;
   const [toasts, setToasts] = React.useState<ToastT[]>([]);
   const possiblePositions = React.useMemo(() => {
@@ -667,6 +669,7 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
   }, []);
 
   const removeAllToasts = React.useCallback(() => {
+    onClickClearAll?.();
     setToasts((toasts) => {
       toasts.forEach((toast) => {
         if (!toast.delete) {
@@ -794,7 +797,21 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
     }
   }, [listRef.current]);
 
-  const showScroll = toasts.length > visibleToasts && scrollable;
+  const showScroll = React.useMemo(() => {
+    const isScrollable = toasts.length > visibleToasts && scrollable;
+    if (isScrollable) {
+    }
+    return isScrollable;
+  }, [toasts, visibleToasts, scrollable]);
+
+  React.useEffect(() => {
+    if (showScroll) {
+      onScrollVisible?.({
+        nbToasts: heights.length,
+        totalHeight: heights.reduce((acc, curr) => acc + curr.height + gap, 0),
+      });
+    }
+  }, [showScroll]);
 
   return (
     // Remove item from normal navigation flow, only available via hotkey
