@@ -1098,14 +1098,15 @@ const Toaster = /*#__PURE__*/ React__default.default.forwardRef(function Toaster
         scrollable
     ]);
     React__default.default.useEffect(()=>{
-        if (showScroll) {
+        if (showScroll && expanded) {
             onScrollVisible == null ? void 0 : onScrollVisible({
                 nbToasts: heights.length,
                 totalHeight: heights.reduce((acc, curr)=>acc + curr.height + gap, 0)
             });
         }
     }, [
-        showScroll
+        showScroll,
+        expanded
     ]);
     return(// Remove item from normal navigation flow, only available via hotkey
     /*#__PURE__*/ React__default.default.createElement("section", {

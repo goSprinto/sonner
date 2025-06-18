@@ -805,13 +805,13 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
   }, [toasts, visibleToasts, scrollable]);
 
   React.useEffect(() => {
-    if (showScroll) {
+    if (showScroll && expanded) {
       onScrollVisible?.({
         nbToasts: heights.length,
         totalHeight: heights.reduce((acc, curr) => acc + curr.height + gap, 0),
       });
     }
-  }, [showScroll]);
+  }, [showScroll, expanded]);
 
   return (
     // Remove item from normal navigation flow, only available via hotkey
