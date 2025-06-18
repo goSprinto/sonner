@@ -620,17 +620,17 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
     richColors,
     duration,
     style,
-    visibleToasts = 7,
-    visibleStackedToasts = 3,
+    visibleToasts = VISIBLE_TOASTS_AMOUNT,
+    visibleStackedToasts = VISIBLE_TOASTS_AMOUNT,
     toastOptions,
     dir = getDocumentDirection(),
     gap = GAP,
     icons,
     containerAriaLabel = 'Notifications',
-    clearAllButton = true,
-    scrollable = true,
+    clearAllButton,
+    scrollable,
     toastWidth = TOAST_WIDTH,
-    showBackdrop = true,
+    showBackdrop,
   } = props;
   const [toasts, setToasts] = React.useState<ToastT[]>([]);
   const possiblePositions = React.useMemo(() => {

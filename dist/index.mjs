@@ -407,6 +407,8 @@ function isAction(action) {
     return action.label !== undefined;
 }
 
+// Visible toasts amount
+const VISIBLE_TOASTS_AMOUNT = 3;
 // Viewport padding
 const VIEWPORT_OFFSET = '24px';
 // Mobile viewport padding
@@ -919,7 +921,7 @@ const Toaster = /*#__PURE__*/ React.forwardRef(function Toaster(props, ref) {
     const { invert, position = 'bottom-right', hotkey = [
         'altKey',
         'KeyT'
-    ], expand, closeButton, className, offset, mobileOffset, theme = 'light', richColors, duration, style, visibleToasts = 7, visibleStackedToasts = 3, toastOptions, dir = getDocumentDirection(), gap = GAP, icons, containerAriaLabel = 'Notifications', clearAllButton = true, scrollable = true, toastWidth = TOAST_WIDTH, showBackdrop = true } = props;
+    ], expand, closeButton, className, offset, mobileOffset, theme = 'light', richColors, duration, style, visibleToasts = VISIBLE_TOASTS_AMOUNT, visibleStackedToasts = VISIBLE_TOASTS_AMOUNT, toastOptions, dir = getDocumentDirection(), gap = GAP, icons, containerAriaLabel = 'Notifications', clearAllButton, scrollable, toastWidth = TOAST_WIDTH, showBackdrop } = props;
     const [toasts, setToasts] = React.useState([]);
     const possiblePositions = React.useMemo(()=>{
         return Array.from(new Set([
