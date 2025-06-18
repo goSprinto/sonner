@@ -383,6 +383,19 @@ html[dir='rtl'],
   z-index: 10;
 }
 
+[data-sonner-backdrop] {
+  animation: sonner-fade-in-clear-all 300ms ease forwards;
+  opacity: 0;
+  backdrop-filter: blur(12px);
+  width: 100vw;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: fixed;
+  pointer-events: none;
+  z-index: calc(999999999 - 100);
+}
+
 @keyframes swipe-out-left {
   from {
     transform: var(--y) translateX(var(--swipe-amount-x));

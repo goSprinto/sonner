@@ -526,6 +526,13 @@ function getDocumentDirection(): ToasterProps['dir'] {
   return dirAttribute as ToasterProps['dir'];
 }
 
+// Add Safari detection function
+function isSafari(): boolean {
+  if (typeof window === 'undefined') return false;
+  const ua = window.navigator.userAgent.toLowerCase();
+  return ua.includes('safari') && !ua.includes('chrome');
+}
+
 function assignOffset(defaultOffset: ToasterProps['offset'], mobileOffset: ToasterProps['mobileOffset']) {
   const styles = {} as React.CSSProperties;
 
@@ -613,16 +620,17 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
     richColors,
     duration,
     style,
-    visibleToasts = VISIBLE_TOASTS_AMOUNT,
-    visibleStackedToasts = VISIBLE_TOASTS_AMOUNT,
+    visibleToasts = 7,
+    visibleStackedToasts = 3,
     toastOptions,
     dir = getDocumentDirection(),
     gap = GAP,
     icons,
     containerAriaLabel = 'Notifications',
-    clearAllButton,
-    scrollable,
+    clearAllButton = true,
+    scrollable = true,
     toastWidth = TOAST_WIDTH,
+    showBackdrop = true,
   } = props;
   const [toasts, setToasts] = React.useState<ToastT[]>([]);
   const possiblePositions = React.useMemo(() => {
@@ -889,8 +897,15 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
                         heights.slice(0, visibleToasts).reduce((acc, curr) => acc + curr.height + gap, 0) -
                           (heights.length >= visibleToasts ? heights[visibleToasts - 1].height / 2 : 0),
                       scrollbarWidth: 'none',
-                      display: 'flex',
-                      flexDirection: 'column-reverse',
+                      ...(isSafari()
+                        ? {
+                            display: 'block',
+                            transform: 'scaleY(-1)',
+                          }
+                        : {
+                            display: 'flex',
+                            flexDirection: 'column-reverse',
+                          }),
                     }
                   : {}),
               }}
@@ -904,6 +919,11 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
                           : heights.length > 0
                           ? heights[0].height + visibleStackedToasts * gap
                           : 0,
+                        ...(isSafari() && showScroll
+                          ? {
+                              transform: 'scaleY(-1)',
+                            }
+                          : {}),
                       }
                     : {}),
                 }}
@@ -948,6 +968,19 @@ const Toaster = React.forwardRef<HTMLElement, ToasterProps>(function Toaster(pro
           </div>
         );
       })}
+      {showBackdrop && (
+        <div
+          data-sonner-backdrop=""
+          style={{
+            display: expanded ? 'block' : 'none',
+            height:
+              (Number(offset) * 2 || 0) +
+              heights.slice(0, visibleToasts).reduce((acc, curr) => acc + curr.height + gap, 0) -
+              (scrollable && heights.length > visibleToasts ? heights[visibleToasts - 1].height / 2 : 0) +
+              (clearAllButton ? 60 : 0),
+          }}
+        />
+      )}
     </section>
   );
 });

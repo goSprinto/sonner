@@ -146,6 +146,7 @@ export interface ToasterProps {
   clearAllButton?: boolean | React.ReactNode;
   scrollable?: boolean;
   toastWidth?: number;
+  showBackdrop?: boolean;
 }
 
 export type SwipeDirection = 'top' | 'right' | 'bottom' | 'left';

@@ -115,6 +115,7 @@ interface ToasterProps {
     clearAllButton?: boolean | React.ReactNode;
     scrollable?: boolean;
     toastWidth?: number;
+    showBackdrop?: boolean;
 }
 type SwipeDirection = 'top' | 'right' | 'bottom' | 'left';
 interface ToastToDismiss {
