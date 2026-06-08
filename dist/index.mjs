@@ -438,6 +438,7 @@ function getDefaultSwipeDirections(position) {
     return directions;
 }
 const Toast = (props)=>{
+    var _toast_richColors, _ref;
     var _toast_classNames, _toast_classNames1, _toast_classNames2, _toast_classNames3, _toast_classNames4, _toast_classNames5, _toast_classNames6, _toast_classNames7, _toast_classNames8;
     const { invert: ToasterInvert, toast, unstyled, interacting, setHeights, visibleToasts, visibleStackedToasts, heights, index, toasts, expanded, removeToast, defaultRichColors, closeButton: closeButtonFromToaster, style, cancelButtonStyle, actionButtonStyle, className = '', descriptionClassName = '', duration: durationFromToaster, position, gap, expandByDefault, classNames, icons, closeButtonAriaLabel = 'Close toast', scrollable } = props;
     const [swipeDirection, setSwipeDirection] = React.useState(null);
@@ -640,7 +641,6 @@ const Toast = (props)=>{
         });
     }
     const icon = toast.icon || (icons == null ? void 0 : icons[toastType]) || getAsset(toastType);
-    var _toast_richColors, _icons_close;
     return /*#__PURE__*/ React.createElement(React.Fragment, null, /*#__PURE__*/ React.createElement("li", {
         tabIndex: 0,
         ref: toastRef,
@@ -721,6 +721,7 @@ const Toast = (props)=>{
             setSwipeDirection(null);
         },
         onPointerMove: (event)=>{
+            var _props_swipeDirections;
             var _window_getSelection, // Apply transform using both x and y values
             _toastRef_current, _toastRef_current1;
             if (!pointerStartRef.current || !dismissible) return;
@@ -728,7 +729,6 @@ const Toast = (props)=>{
             if (isHighlighted) return;
             const yDelta = event.clientY - pointerStartRef.current.y;
             const xDelta = event.clientX - pointerStartRef.current.x;
-            var _props_swipeDirections;
             const swipeDirections = (_props_swipeDirections = props.swipeDirections) != null ? _props_swipeDirections : getDefaultSwipeDirections(position);
             // Determine swipe direction if not already locked
             if (!swipeDirection && (Math.abs(xDelta) > 1 || Math.abs(yDelta) > 1)) {
@@ -783,7 +783,7 @@ const Toast = (props)=>{
             toast.onDismiss == null ? void 0 : toast.onDismiss.call(toast, toast);
         },
         className: cn(classNames == null ? void 0 : classNames.closeButton, toast == null ? void 0 : (_toast_classNames2 = toast.classNames) == null ? void 0 : _toast_classNames2.closeButton)
-    }, (_icons_close = icons == null ? void 0 : icons.close) != null ? _icons_close : CloseIcon) : null, (toastType || toast.icon || toast.promise) && toast.icon !== null && ((icons == null ? void 0 : icons[toastType]) !== null || toast.icon) ? /*#__PURE__*/ React.createElement("div", {
+    }, (_ref = icons == null ? void 0 : icons.close) != null ? _ref : CloseIcon) : null, (toastType || toast.icon || toast.promise) && toast.icon !== null && ((icons == null ? void 0 : icons[toastType]) !== null || toast.icon) ? /*#__PURE__*/ React.createElement("div", {
         "data-icon": "",
         className: cn(classNames == null ? void 0 : classNames.icon, toast == null ? void 0 : (_toast_classNames3 = toast.classNames) == null ? void 0 : _toast_classNames3.icon)
     }, toast.promise || toast.type === 'loading' && !toast.icon ? toast.icon || getLoadingIcon() : null, toast.type !== 'loading' ? icon : null) : null, /*#__PURE__*/ React.createElement("div", {
@@ -918,17 +918,26 @@ function useSonner() {
     };
 }
 const Toaster = /*#__PURE__*/ React.forwardRef(function Toaster(props, ref) {
-    const { invert, position = 'bottom-right', hotkey = [
+    const { id, invert, position = 'bottom-right', hotkey = [
         'altKey',
         'KeyT'
     ], expand, closeButton, className, offset, mobileOffset, theme = 'light', richColors, duration, style, visibleToasts = VISIBLE_TOASTS_AMOUNT, visibleStackedToasts = VISIBLE_TOASTS_AMOUNT, toastOptions, dir = getDocumentDirection(), gap = GAP, icons, containerAriaLabel = 'Notifications', clearAllButton, onClickClearAll, scrollable, toastWidth = TOAST_WIDTH, showBackdrop, onScrollVisible } = props;
     const [toasts, setToasts] = React.useState([]);
+    const filteredToasts = React.useMemo(()=>{
+        if (id) {
+            return toasts.filter((toast)=>toast.toasterId === id);
+        }
+        return toasts.filter((toast)=>!toast.toasterId);
+    }, [
+        toasts,
+        id
+    ]);
     const possiblePositions = React.useMemo(()=>{
         return Array.from(new Set([
             position
-        ].concat(toasts.filter((toast)=>toast.position).map((toast)=>toast.position))));
+        ].concat(filteredToasts.filter((toast)=>toast.position).map((toast)=>toast.position))));
     }, [
-        toasts,
+        filteredToasts,
         position
     ]);
     const [heights, setHeights] = React.useState([]);
@@ -1113,7 +1122,7 @@ const Toaster = /*#__PURE__*/ React.forwardRef(function Toaster(props, ref) {
     }, possiblePositions.map((position, index)=>{
         var _heights_;
         const [y, x] = position.split('-');
-        if (!toasts.length) return null;
+        if (!filteredToasts.length) return null;
         return /*#__PURE__*/ React.createElement("div", {
             key: position,
             dir: dir === 'auto' ? getDocumentDirection() : dir,
@@ -1199,20 +1208,20 @@ const Toaster = /*#__PURE__*/ React.forwardRef(function Toaster(props, ref) {
                 } : {}
             }
         }, toasts.filter((toast)=>!toast.position && index === 0 || toast.position === position).map((toast, index)=>{
-            var _toastOptions_duration, _toastOptions_closeButton;
+            var _ref, _ref1;
             return /*#__PURE__*/ React.createElement(Toast, {
                 key: toast.id,
                 icons: icons,
                 index: index,
                 toast: toast,
                 defaultRichColors: richColors,
-                duration: (_toastOptions_duration = toastOptions == null ? void 0 : toastOptions.duration) != null ? _toastOptions_duration : duration,
+                duration: (_ref = toastOptions == null ? void 0 : toastOptions.duration) != null ? _ref : duration,
                 className: toastOptions == null ? void 0 : toastOptions.className,
                 descriptionClassName: toastOptions == null ? void 0 : toastOptions.descriptionClassName,
                 invert: invert,
                 visibleToasts: visibleToasts,
                 visibleStackedToasts: visibleStackedToasts,
-                closeButton: (_toastOptions_closeButton = toastOptions == null ? void 0 : toastOptions.closeButton) != null ? _toastOptions_closeButton : closeButton,
+                closeButton: (_ref1 = toastOptions == null ? void 0 : toastOptions.closeButton) != null ? _ref1 : closeButton,
                 interacting: interacting,
                 position: position,
                 style: toastOptions == null ? void 0 : toastOptions.style,
